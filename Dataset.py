@@ -1,4 +1,5 @@
 #Dataset
+
 import os
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -8,6 +9,7 @@ import numpy as np
 
 class processMatriz(Dataset):
     def __init__(self, file_paths):
+      #elementos propios
         self.file_paths = file_paths
         self.inic_m = None
         self.head_m = None
@@ -16,7 +18,9 @@ class processMatriz(Dataset):
         self.final_m = None
         self.relation = None
 
-        #Funciones adicionales
+        #Funciones adicionales---------------
+
+        #Para la determinación de la posición de la entidad 1
         def posicionesh(num):
           if len(h_pos[num]) == 1:
                 valorh = h_pos[num]
@@ -25,6 +29,7 @@ class processMatriz(Dataset):
                 valoresh = h_pos[num]
                 return valoresh
 
+        #Para la determinación de la posición de la entidad 2
         def posicionest(num):
             if len(t_pos[num]) == 1:
                   valort = t_pos[num]
@@ -33,6 +38,7 @@ class processMatriz(Dataset):
                   valorest = t_pos[num]
                   return valorest
 
+        #Función para el padding, que empareja las longitudes de una lista
         def padding(tensor, tamano_deseado):
             tamano_actual = tensor.size(0)
             filas_faltantes = tamano_deseado - tamano_actual
@@ -46,12 +52,14 @@ class processMatriz(Dataset):
         #proceso los archivos JSON y almaceno las matrices en data
         listasrel = []
         for file_path in file_paths:
+
             #Cargar el archivo de Json
             with open(file_path, 'r') as json_file:
                 data = json.load(json_file)
             flat_emb = data["flat_emb"]
             relation = data["relation"]
             listasrel.append(relation)
+            #print('DESDE DENTROOO REL: ',relation)
             h_pos_t = data["h_pos"]
             t_pos_t = data["t_pos"]
 
@@ -99,7 +107,7 @@ class processMatriz(Dataset):
                   final = matrizsub[0][int(t_pos_t[count][-1]):][:]
               count = count+1
 
-              #ajuste de tamaños
+              #ajuste de tamaños----------------
               if head.dim() != 1:
                 head = torch.mean(head, dim=0)
               if tail.dim() != 1:
@@ -127,7 +135,7 @@ class processMatriz(Dataset):
               tail_m = torch.cat((tail_m, tail.unsqueeze(0)), dim=0)
               final_m = torch.cat((final_m, final.unsqueeze(0)), dim=0)
 
-            #reshape final para corregir la dimension faltante
+            #Hago el reshape final para corregir la dimension faltante
             tamanoOr = inic_m.size()
             tam = tamanoOr[0]
             inic_mf = inic_m.reshape(tam, 1 , 7, 1024)
@@ -135,8 +143,14 @@ class processMatriz(Dataset):
             inter_mf = inter_m.reshape(tam,1, 5, 1024)
             tail_mf = tail_m.reshape(tam, 1024)
             final_mf = final_m.reshape(tam,1, 11, 1024)
+            #print("inic_mf antes: ", inic_m.size(), "inic despues: ", inic_mf.size())
+            #print("head_mf antes: ", head_m.size(), "head despues: ", head_mf.size())
+            #print("inter_mf antes: ", inter_m.size(), "inter despues: ", inter_mf.size())
+            #print("tail_mf antes: ", tail_m.size(), "tail despues: ", tail_mf.size())
+            #print("final_mf antes: ", final_m.size(), "final despues: ", final_mf.size())
 
             #guardo todo al final
+            #print('voy a guardar rel: ', relation_t)
             if self.inic_m is None:
                 self.inic_m = inic_mf
             else:
@@ -169,11 +183,16 @@ class processMatriz(Dataset):
             return 0  # En caso de que no haya procesado nada aun
 
     def __getitem__(self, index):
-        # index dice cuál oracion se necesita
+        # index dice cuál oracion necesito
         elemento1 = self.inic_m[index]
         elemento2 = self.head_m[index]
         elemento3 = self.inter_m[index]
         elemento4 = self.tail_m[index]
         elemento5 = self.final_m[index]
         elemento6 = self.relation[index]
+        #print("index:", index)
+        #print("relation: ", self.relation, '\n')
+        #print("elemento6: ", elemento6)
         return elemento1,elemento2,elemento3,elemento4,elemento5, elemento6
+#Fin Dataset----------------------------------------------------------------------
+

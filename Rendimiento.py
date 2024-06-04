@@ -1,8 +1,42 @@
 #Rendimiento
 
+from matplotlib import pyplot as plt
+
+def nanlist(lista):
+    contaf = 0
+    for num in lista:
+        if math.isnan(num):
+            contaf+=1
+    return contaf
+
+pruebas = []
+pos = 0
+for i in range(len(train_losses)):
+    pruebas.append(i)
+
+print("Total de nan en train_losses:", nanlist(train_losses))
+print("Total de nan en train_accuracies:", nanlist(train_accuracies))
+print("Total de nan en validation_losses:", nanlist(validation_losses))
+print("Total de nan en validation_accuracies:", nanlist(validation_accuracies))
+
+fig, ax = plt.subplots(nrows = 2, ncols = 2, figsize=(12,5))
+ax[0,0].plot(pruebas,train_losses, marker='o', linestyle='-')
+ax[0,0].set_title("Train losses")
+ax[0,1].plot(pruebas,train_accuracies, marker='o', linestyle='-')
+ax[0,1].set_title("Train accuracies")
+ax[1,0].plot(pruebas,validation_losses, marker='o', linestyle='-')
+ax[1,0].set_title("validation losses")
+ax[1,1].plot(pruebas, validation_accuracies, marker='o', linestyle='-')
+ax[1,1].set_title("validation accuracies")
+plt.tight_layout()
+
+
+
 #Retorno del modelo entrenado
-checkpoint = torch.load('/home/patrones/Escritorio/Jose/Pruebas spyder/ArchivoSinNAN/modelo_entrenado.pth')
-#/home/patrones/Escritorio/Jose/Pruebas spyder/ArchivoSinNAN/modelo_entrenado.pth
+
+#cargo el modelo desde el archivo
+checkpoint = torch.load('/content/modelo_entrenado.pth')
+##/home/patrones/Escritorio/Jose/Pruebas spyder/ArchivoSinNAN/modelo_entrenado.pth
 
 #creo una nueva instancia del modelo
 model = CNN()
@@ -19,7 +53,7 @@ softm = nn.Softmax(dim=0)
 #CICLO DE TEST
 
 # instancio dataset
-full_dataset = processMatriz(["/home/patrones/Escritorio/Jose/Pruebas spyder/ArchivoSinNAN/nuevoTest.json"])
+full_dataset = processMatriz(["/content/Matriz2.json"])
 #/home/patrones/Escritorio/Jose/Pruebas spyder/ArchivoSinNAN/nuevoTest.json
 test_dataloader = DataLoader(full_dataset, batch_size=5)
 
@@ -36,7 +70,6 @@ for data in test_dataloader:
         print("NAN encontrada en la iteracion de test: ", iter, ". Con un total de NAN de :", numnanTest)
 
     iter+=iter
-    
     true_labels.append(data[-1])
 
     inputs_head, inputs_inter, inputs_tail, inputs_ent1, inputs_ent2, labels = data
@@ -58,6 +91,7 @@ predicted_labels = [tensor.item() for tensor in predicted_labelst]
 true_labelsf = [valor.item() for tensor_lista in true_labels for valor in tensor_lista]
 
 
+#PARAMETROS
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 import matplotlib.pyplot as plt
 import seaborn as sns
