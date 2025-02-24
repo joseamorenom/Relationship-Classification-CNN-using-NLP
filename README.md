@@ -44,9 +44,6 @@ Relationship-Classification-CNN-using-NLP/
 │   ├── Rendimiento.py         # Evaluation of the wGMU model
 │   └── wGMU modificada.py     # Modified version of the code for wGMU
 │
-├── TransferLearning/          # (Optional) Documentation and scripts for the Pratech use case
-│   └── (Additional files and scripts)
-│
 └── README.md                  # This file
 ```
 
